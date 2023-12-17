@@ -11,27 +11,31 @@ package Sudoku;
  * 5 - Rayhan Lauzzadani - 5026221186
  */
 
+import java.awt.Color;
+import java.awt.Font;
 import javax.swing.*;
-import java.awt.*;
+import javax.swing.JTextField;
+import javax.swing.border.Border;
 
+/**
+ * The Cell class model the cells of the Sudoku puzzle, by customizing (subclass)
+ * the javax.swing.JTextField to include row/column, puzzle number and status.
+ */
 public class Cell extends JTextField {
     private static final long serialVersionUID = 1L;  // to prevent serial warning
 
     // Define named constants for JTextField's colors and fonts
     //  to be chosen based on CellStatus
-    public static final Color BG_GIVEN = new Color(20, 189, 172); // RGB new Color(68, 68, 68)
+    public static final Color BG_GIVEN = new Color(128, 136, 211); // RGB
     public static final Color FG_GIVEN = Color.white;
-    public static final Color FG_NOT_GIVEN = Color.WHITE;
-    public static final Color BG_TO_GUESS  = new Color(13, 152,138);
-    public static final Color BG_CORRECT_GUESS =  new Color(20, 189, 172);
+    public static final Color FG_NOT_GIVEN = Color.black;
+    public static final Color BG_TO_GUESS  = Color.WHITE;
+    public static final Color BG_CORRECT_GUESS = new Color(0, 216, 0);
     public static final Color BG_WRONG_GUESS   = new Color(216, 0, 0);
-    public static final Font FONT_NUMBERS = new Font("Poppins", Font.PLAIN,30);
+    public static final Font FONT_NUMBERS = new Font("Courier New", Font.PLAIN, 28);
 
-    // public static final Color COLOR_BG = ;
-    // public static final Color COLOR_BG_STATUS = new Color(216, 216, 216);
-    // public static final Color COLOR_CROSS = new Color(242, 235, 211);  // Red #EF6950
-    // public static final Color COLOR_NOUGHT = new Color(84, 84, 84); // Blue #409AE1
-    // public static final Font FONT_STATUS = new Font("Poppins", Font.PLAIN, 16);
+
+
 
     // Define properties (package-visible)
     /** The row and column number [0-8] of this cell */
@@ -40,13 +44,25 @@ public class Cell extends JTextField {
     int number;
     /** The status of this cell defined in enum CellStatus */
     CellStatus status;
+    boolean islocked;
 
     /** Constructor */
     public Cell(int row, int col) {
         super();   // JTextField
         this.row = row;
         this.col = col;
+        setDocument(new LimitInputCell(1));
         // Inherited from JTextField: Beautify all the cells once for all
+        super.setHorizontalAlignment(JTextField.CENTER);
+        super.setFont(FONT_NUMBERS);
+    }
+
+    public Cell(int row, int col, int value){
+        super(); //JTextField
+        this.row = row;
+        this.col = col;
+        this.number = value;
+        setDocument(new LimitInputCell(1));//Make cell has a limit length input
         super.setHorizontalAlignment(JTextField.CENTER);
         super.setFont(FONT_NUMBERS);
     }
@@ -77,5 +93,9 @@ public class Cell extends JTextField {
         } else if (status == CellStatus.WRONG_GUESS) {    // from TO_GUESS
             super.setBackground(BG_WRONG_GUESS);
         }
+
+
     }
+
+
 }

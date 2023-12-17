@@ -10,121 +10,116 @@ package Sudoku;
  * 4 - Yanuar Audrey Sulistiyo - 5026221074
  * 5 - Rayhan Lauzzadani - 5026221186
  */
-import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import javax.swing.*;
 
+/**
+ * The main Sudoku program
+ */
 public class Main extends JFrame {
     private static final long serialVersionUID = 1L;  // to prevent serial warning
-    private String playerName;
+
     // private variables
     GameBoardPanel board = new GameBoardPanel();
     JButton btnNewGame = new JButton("New Game");
-    JPanel buttonPanel = new JPanel();
-    JButton btnSolve = new JButton("Solve");
-    
-    public String getPlayerName() {
-            return playerName;
-        }
+    JButton btnRestart = new JButton("Restart"); // New button for restart
+    JLabel timerLabel = new JLabel("Timer: 0 seconds");
+    String playerName;
+
+    // Timer variables
+    private Timer timer;
+    private int seconds;
+
     // Constructor
     public Main() {
-        // Meminta input nama pemain
-        playerName = JOptionPane.showInputDialog("Masukkan nama Player:");
-        board.setPlayerName(playerName);
-        Object[] opsi = {"Easy", "Medium", "Hard"};
+        // Prompt the user to enter their name
+        playerName = JOptionPane.showInputDialog(this, "Enter your name:");
 
-        // Menampilkan dialog dengan opsi dan mendapatkan nilai kembaliannya
-        int pilihan = JOptionPane.showOptionDialog(
-                null, // Komponen induk (null untuk dialog tengah layar)
-                "Select Difficulties", // Pesan dialog
-                "Difficulties ", // Judul dialog
-                JOptionPane.DEFAULT_OPTION, // Tipe ikon (DEFAULT_OPTION untuk ikon default)
-                JOptionPane.QUESTION_MESSAGE, // Tipe pesan (QUESTION_MESSAGE untuk pertanyaan)
-                null, // Icon kustom (null untuk ikon default)
-                opsi, // Daftar opsi
-                opsi[0]); // Opsi default yang terpilih
+        Container cp = getContentPane();
+        cp.setLayout(new BorderLayout());
 
-        // Menggunakan nilai kembaliannya untuk menentukan tindakan selanjutnya
-        if(pilihan == JOptionPane.CLOSED_OPTION) {
-            System.out.println("Dialog ditutup tanpa pemilihan.");
-            System.exit(0);
-        } else if (opsi[pilihan]==opsi[0]) {
-            Container cp = getContentPane();
-            cp.setLayout(new BorderLayout());
+        cp.add(board, BorderLayout.CENTER);
 
-            cp.add(board, BorderLayout.CENTER);
+        // Add buttons and timer label to the south to re-start the game via board.newGame() and restart
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.add(btnNewGame);
+        buttonPanel.add(btnRestart);
+        buttonPanel.add(timerLabel);
+        cp.add(buttonPanel, BorderLayout.SOUTH);
 
-            // Add a button to the south to re-start the game via board.newGame()
-            btnNewGame.addActionListener(e -> board.EasyGame()); // Add ActionListener to the button
-            cp.add(btnNewGame, BorderLayout.SOUTH); // Add button to the south
+        // Add ActionListener for New Game button
+        btnNewGame.addActionListener(e -> startNewGame());
 
-            btnSolve.addActionListener(e -> board.SolveGame());
-            buttonPanel.setLayout(new FlowLayout());
-            buttonPanel.add(btnNewGame);
-            buttonPanel.add(btnSolve);
-            cp.add(buttonPanel, BorderLayout.SOUTH);
-            // Initialize the game board to start the game
-            board.EasyGame();
-            
-            pack();     // Pack the UI components, instead of using setSize()
-            setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);  // to handle window-closing
-            setTitle("Sudoku");
-            setVisible(true);
-        } else if (opsi[pilihan]==opsi[1]){
-            Container cp = getContentPane();
-            cp.setLayout(new BorderLayout());
+        // Add ActionListener for Restart button
+        btnRestart.addActionListener(e -> restartGame());
 
-            cp.add(board, BorderLayout.CENTER);
+        // Initialize the game board and timer
+        initializeTimer();
+        board.newGame();
+        startTimer();
 
-            // Add a button to the south to re-start the game via board.newGame()
-            btnNewGame.addActionListener(e -> board.MediumGame()); // Add ActionListener to the button
-            cp.add(btnNewGame, BorderLayout.SOUTH); // Add button to the south
+        pack();     // Pack the UI components, instead of using setSize()
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);  // to handle window-closing
+        setTitle("Sudoku");
+        setVisible(true);
+    }
 
-            btnSolve.addActionListener(e -> board.SolveGame());
-            buttonPanel.setLayout(new FlowLayout());
-            buttonPanel.add(btnNewGame);
-            buttonPanel.add(btnSolve);
-            cp.add(buttonPanel, BorderLayout.SOUTH);
-            // Initialize the game board to start the game
-            board.MediumGame();
-
-            pack();     // Pack the UI components, instead of using setSize()
-            setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);  // to handle window-closing
-            setTitle("Sudoku");
-            setVisible(true);
-        } else if (opsi[pilihan]==opsi[2]){
-            Container cp = getContentPane();
-            cp.setLayout(new BorderLayout());
-
-            cp.add(board, BorderLayout.CENTER);
-
-            // Add a button to the south to re-start the game via board.newGame()
-            btnNewGame.addActionListener(e -> board.HardGame()); // Add ActionListener to the button
-            cp.add(btnNewGame, BorderLayout.SOUTH); // Add button to the south
-
-            btnSolve.addActionListener(e -> board.SolveGame());
-
-            buttonPanel.setLayout(new FlowLayout());
-            buttonPanel.add(btnNewGame);
-            buttonPanel.add(btnSolve);
-            cp.add(buttonPanel, BorderLayout.SOUTH);
-            // Initialize the game board to start the game
-            board.HardGame();
-
-            pack();     // Pack the UI components, instead of using setSize()
-            setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);  // to handle window-closing
-            setTitle("Sudoku");
-            setVisible(true);
+    // Method to start a new game
+    private void startNewGame() {
+        // Prompt the user to enter their name if not provided
+        if (playerName == null || playerName.trim().isEmpty()) {
+            playerName = JOptionPane.showInputDialog(this, "Enter your name:");
         }
-        
-            
+
+        restartTimer();
+        board.newGame();
+    }
+
+    // Method to restart the game
+    private void restartGame() {
+        restartTimer();
+        board.newGame();
+        JOptionPane.showMessageDialog(this, "Game Restarted!");
+    }
+
+    // Method to initialize the timer
+    private void initializeTimer() {
+        seconds = 0;
+        timer = new Timer(1000, new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                seconds++;
+                updateTimerLabel();
+            }
+        });
+    }
+
+    // Method to start the timer
+    private void startTimer() {
+        timer.start();
+    }
+
+    // Method to restart the timer
+    private void restartTimer() {
+        timer.stop();
+        seconds = 0;
+        updateTimerLabel();
+        timer.start();
+    }
+
+    // Method to update the timer label
+    private void updateTimerLabel() {
+        timerLabel.setText("Timer: " + seconds + " seconds");
     }
 
     /** The entry main() entry method */
     public static void main(String[] args) {
-        // [TODO 1] Check "Swing program template" on how to run
-        // the constructor of "SudokuMain"
-        SwingUtilities.invokeLater(() -> {
-            new Main();
+        // Run GUI codes in the Event-Dispatching thread for thread safety
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                new Main();  // Let the constructor do the job
+            }
         });
     }
 }
