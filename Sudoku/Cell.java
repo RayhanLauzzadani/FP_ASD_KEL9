@@ -15,7 +15,6 @@ import java.awt.Color;
 import java.awt.Font;
 import javax.swing.*;
 import javax.swing.JTextField;
-import javax.swing.border.Border;
 
 /**
  * The Cell class model the cells of the Sudoku puzzle, by customizing (subclass)
@@ -32,11 +31,11 @@ public class Cell extends JTextField {
     public static final Color BG_TO_GUESS  = Color.WHITE;
     public static final Color BG_CORRECT_GUESS = new Color(0, 216, 0);
     public static final Color BG_WRONG_GUESS   = new Color(216, 0, 0);
-    public static final Font FONT_NUMBERS = new Font("Courier New", Font.PLAIN, 28);
+    public static final Font FONT_NUMBERS = new Font("Poppins", Font.PLAIN, 28);
 
 
 
-
+ 
     // Define properties (package-visible)
     /** The row and column number [0-8] of this cell */
     int row, col;

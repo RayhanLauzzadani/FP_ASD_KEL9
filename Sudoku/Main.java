@@ -20,17 +20,21 @@ import javax.swing.*;
  */
 public class Main extends JFrame {
     private static final long serialVersionUID = 1L;  // to prevent serial warning
-
+private String playerName;
     // private variables
     GameBoardPanel board = new GameBoardPanel();
     JButton btnNewGame = new JButton("New Game");
     JButton btnRestart = new JButton("Restart"); // New button for restart
     JLabel timerLabel = new JLabel("Timer: 0 seconds");
-    String playerName;
 
     // Timer variables
     private Timer timer;
     private int seconds;
+
+    // inisiasi PlayerName
+    public String getPlayerName() {
+        return playerName;
+    }
 
     // Constructor
     public Main() {
@@ -40,7 +44,7 @@ public class Main extends JFrame {
         Container cp = getContentPane();
         cp.setLayout(new BorderLayout());
 
-        cp.add(board, BorderLayout.CENTER);
+        cp.add(board, BorderLayout.CENTER); 
 
         // Add buttons and timer label to the south to re-start the game via board.newGame() and restart
         JPanel buttonPanel = new JPanel();
