@@ -111,6 +111,7 @@ public class Puzzle {
         }
         return isValid;
     }
+
     public boolean solve(){
         Stack<Cell> stack = new Stack<>();
         int currentRow = 0;

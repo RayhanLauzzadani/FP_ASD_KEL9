@@ -84,7 +84,7 @@ private String playerName;
     // Method to restart the game
     private void restartGame() {
         restartTimer();
-        board.newGame();
+        
         JOptionPane.showMessageDialog(this, "Game Restarted!");
     }
 

@@ -14,6 +14,7 @@ package Sudoku;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
+import javax.swing.border.LineBorder;
 
 public class GameBoardPanel extends JPanel {
     private static final long serialVersionUID = 1L;  // to prevent serial warning
@@ -21,8 +22,12 @@ public class GameBoardPanel extends JPanel {
     private Timer timer;
     private int seconds;
 
+    static Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+    static int screenHeight = screenSize.height;
+    int screenWidth = screenSize.width;
+    
     // Define named constants for UI sizes
-    public static final int CELL_SIZE = 60;   // Cell width/height in pixels
+    public static int CELL_SIZE = screenHeight/14;   // Cell width/height in pixels
     public static final int BOARD_WIDTH  = CELL_SIZE * SudokuConstants.GRID_SIZE;
     public static final int BOARD_HEIGHT = CELL_SIZE * SudokuConstants.GRID_SIZE;
     // Board width/height in pixels
@@ -32,6 +37,7 @@ public class GameBoardPanel extends JPanel {
     private Cell[][] cells = new Cell[SudokuConstants.GRID_SIZE][SudokuConstants.GRID_SIZE];
     /** It also contains a Puzzle with array numbers and isGiven */
     private Puzzle puzzle = new Puzzle();
+    JPanel gridsudoku = new JPanel();
     
 
     public void setPlayerName(String playerName) {
@@ -40,13 +46,25 @@ public class GameBoardPanel extends JPanel {
 
     /** Constructor */
     public GameBoardPanel() {
-        super.setLayout(new GridLayout(SudokuConstants.GRID_SIZE, SudokuConstants.GRID_SIZE));  // JPanel
+        super.setLayout(new GridLayout());  // JPanel
+        super.add(gridsudoku, BorderLayout.CENTER);
+        gridsudoku.setPreferredSize(new Dimension(BOARD_WIDTH,BOARD_HEIGHT));
+        gridsudoku.setBorder(new LineBorder(Color.blue,10));
+        gridsudoku.setLayout(new GridLayout(SudokuConstants.SUBGRID_SIZE, SudokuConstants.SUBGRID_SIZE));
 
         // Allocate the 2D array of Cell, and added into JPanel.
-        for (int row = 0; row < SudokuConstants.GRID_SIZE; ++row) {
-            for (int col = 0; col < SudokuConstants.GRID_SIZE; ++col) {
-                cells[row][col] = new Cell(row, col);
-                super.add(cells[row][col]);   // JPanel
+        for (int row = 0; row < SudokuConstants.SUBGRID_SIZE; row++) {
+            for (int col = 0; col < SudokuConstants.SUBGRID_SIZE; col++) {
+                JPanel subgridpanel = new JPanel();
+                subgridpanel.setLayout(new GridLayout(SudokuConstants.SUBGRID_SIZE, SudokuConstants.SUBGRID_SIZE));
+                subgridpanel.setBorder(new LineBorder(Color.black,2));
+                for (int i=0; i < SudokuConstants.SUBGRID_SIZE; i++) {
+                    for (int j=0; j < SudokuConstants.SUBGRID_SIZE; j++) {
+                        cells[row*3+i][col*3+j] = new Cell(row*3+i, col*3+j);
+                        subgridpanel.add(cells[row*3+i][col*3+j]);
+                    }
+                }
+                gridsudoku.add(subgridpanel);
             }
         }
 
