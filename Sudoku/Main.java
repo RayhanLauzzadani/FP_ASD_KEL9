@@ -1,4 +1,5 @@
 package Sudoku;
+
 /**
  * ES234317-Algorithm and Data Structures
  * Semester Ganjil, 2023/2024
@@ -19,17 +20,20 @@ import javax.swing.*;
  * The main Sudoku program
  */
 public class Main extends JFrame {
-    private static final long serialVersionUID = 1L;  // to prevent serial warning
-private String playerName;
+    private static final long serialVersionUID = 1L; // to prevent serial warning
+    private String playerName;
     // private variables
     GameBoardPanel board = new GameBoardPanel();
     JButton btnNewGame = new JButton("New Game");
-    JButton btnRestart = new JButton("Restart"); // New button for restart
+    JButton btnSolve = new JButton("Solve");
     JLabel timerLabel = new JLabel("Timer: 0 seconds");
 
     // Timer variables
     private Timer timer;
     private int seconds;
+
+    JComboBox<String> difficultyComboBox;
+    JButton btnChangeDifficulty;
 
     // inisiasi PlayerName
     public String getPlayerName() {
@@ -38,34 +42,53 @@ private String playerName;
 
     // Constructor
     public Main() {
+        // Prompt the user to select difficulty
+        String[] difficultyOptions = { "Easy", "Medium", "Hard" };
+        difficultyComboBox = new JComboBox<>(difficultyOptions);
         // Prompt the user to enter their name
         playerName = JOptionPane.showInputDialog(this, "Enter your name:");
+        JOptionPane.showMessageDialog(this, difficultyComboBox, "Select Difficulty", JOptionPane.QUESTION_MESSAGE);
 
         Container cp = getContentPane();
         cp.setLayout(new BorderLayout());
 
-        cp.add(board, BorderLayout.CENTER); 
+        cp.add(board, BorderLayout.CENTER);
 
-        // Add buttons and timer label to the south to re-start the game via board.newGame() and restart
+        // Add buttons and timer label to the south to re-start the game via
+        // board.newGame() and restart
         JPanel buttonPanel = new JPanel();
+        JButton changeDifficultyButton = new JButton("Change Difficulty");
+        buttonPanel.add(changeDifficultyButton);
         buttonPanel.add(btnNewGame);
-        buttonPanel.add(btnRestart);
+        buttonPanel.add(btnSolve);
         buttonPanel.add(timerLabel);
         cp.add(buttonPanel, BorderLayout.SOUTH);
+
+        changeDifficultyButton.addActionListener(e -> showDifficultyDialog());
+        btnSolve.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                board.solve();
+                if (board.isSolved()) {
+                    // Menggunakan Main.this untuk merujuk ke instance Main saat ini
+                    JOptionPane.showMessageDialog(Main.this, "Congratulations! Puzzle solved!", "Congratulations",
+                            JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(Main.this, "Puzzle is not solved yet. Keep trying!", "Incomplete Puzzle",
+                            JOptionPane.WARNING_MESSAGE);
+                }
+            }
+        });
 
         // Add ActionListener for New Game button
         btnNewGame.addActionListener(e -> startNewGame());
 
-        // Add ActionListener for Restart button
-        btnRestart.addActionListener(e -> restartGame());
-
         // Initialize the game board and timer
         initializeTimer();
-        board.newGame();
+        board.newGame(getSelectedDifficultyLevel());
         startTimer();
 
-        pack();     // Pack the UI components, instead of using setSize()
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);  // to handle window-closing
+        pack(); // Pack the UI components, instead of using setSize()
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // to handle window-closing
         setTitle("Sudoku");
         setVisible(true);
     }
@@ -78,14 +101,17 @@ private String playerName;
         }
 
         restartTimer();
-        board.newGame();
+        board.newGame(getSelectedDifficultyLevel());
     }
 
-    // Method to restart the game
-    private void restartGame() {
+    private String getSelectedDifficultyLevel() {
+        return (String) difficultyComboBox.getSelectedItem();
+    }
+
+    private void showDifficultyDialog() {
+        JOptionPane.showMessageDialog(this, difficultyComboBox, "Change Difficulty", JOptionPane.QUESTION_MESSAGE);
+        board.newGame(getSelectedDifficultyLevel());
         restartTimer();
-        
-        JOptionPane.showMessageDialog(this, "Game Restarted!");
     }
 
     // Method to initialize the timer
@@ -122,7 +148,7 @@ private String playerName;
         // Run GUI codes in the Event-Dispatching thread for thread safety
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                new Main();  // Let the constructor do the job
+                new Main(); // Let the constructor do the job
             }
         });
     }

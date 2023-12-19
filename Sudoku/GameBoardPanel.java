@@ -19,8 +19,6 @@ import javax.swing.border.LineBorder;
 public class GameBoardPanel extends JPanel {
     private static final long serialVersionUID = 1L;  // to prevent serial warning
     private String playerName;
-    private Timer timer;
-    private int seconds;
 
     static Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
     static int screenHeight = screenSize.height;
@@ -38,8 +36,8 @@ public class GameBoardPanel extends JPanel {
     /** It also contains a Puzzle with array numbers and isGiven */
     private Puzzle puzzle = new Puzzle();
     JPanel gridsudoku = new JPanel();
+    JComboBox<String> difficultyComboBox;
     
-
     public void setPlayerName(String playerName) {
         this.playerName = playerName;
     }
@@ -49,7 +47,7 @@ public class GameBoardPanel extends JPanel {
         super.setLayout(new GridLayout());  // JPanel
         super.add(gridsudoku, BorderLayout.CENTER);
         gridsudoku.setPreferredSize(new Dimension(BOARD_WIDTH,BOARD_HEIGHT));
-        gridsudoku.setBorder(new LineBorder(Color.blue,10));
+        gridsudoku.setBorder(new LineBorder(new Color(190, 208, 238),15));
         gridsudoku.setLayout(new GridLayout(SudokuConstants.SUBGRID_SIZE, SudokuConstants.SUBGRID_SIZE));
 
         // Allocate the 2D array of Cell, and added into JPanel.
@@ -57,7 +55,7 @@ public class GameBoardPanel extends JPanel {
             for (int col = 0; col < SudokuConstants.SUBGRID_SIZE; col++) {
                 JPanel subgridpanel = new JPanel();
                 subgridpanel.setLayout(new GridLayout(SudokuConstants.SUBGRID_SIZE, SudokuConstants.SUBGRID_SIZE));
-                subgridpanel.setBorder(new LineBorder(Color.black,2));
+                subgridpanel.setBorder(new LineBorder(new Color(251, 217, 216),2));
                 for (int i=0; i < SudokuConstants.SUBGRID_SIZE; i++) {
                     for (int j=0; j < SudokuConstants.SUBGRID_SIZE; j++) {
                         cells[row*3+i][col*3+j] = new Cell(row*3+i, col*3+j);
@@ -89,9 +87,8 @@ public class GameBoardPanel extends JPanel {
      * Generate a new puzzle; and reset the gameboard of cells based on the puzzle.
      * You can call this method to start a new game.
      */
-    public void newGame() {
-        // Generate a new puzzle
-        puzzle.newPuzzle(2);
+    public void newGames() {
+        puzzle.newPuzzle(1, 60);
 
         // Initialize all the 9x9 cells, based on the puzzle.
         for (int row = 0; row < SudokuConstants.GRID_SIZE; ++row) {
@@ -101,11 +98,40 @@ public class GameBoardPanel extends JPanel {
         }
     }
 
-    public void restartTimer() {
-        timer.stop();
-        seconds = 0;
-        timer.start();
+    public void newGame(String difficultyLevel) {
+        // Generate a new puzzle based on difficulty level
+        int level;
+        int toGivenCells;
+        switch (difficultyLevel.toLowerCase()) {
+            case "easy":
+                level = 1;
+                toGivenCells = 60;
+                break;
+            case "medium":
+                level = 2;
+                toGivenCells = 50;
+                break;
+            case "hard":
+                level = 3;
+                toGivenCells = 30;
+                break;
+            default:
+                level = 2; 
+                toGivenCells = 45;
+                // Default to medium if an invalid difficulty level is provided
+        }
+        
+        // Generate a new puzzle
+        puzzle.newPuzzle(level, toGivenCells);
+
+        // Initialize all the 9x9 cells, based on the puzzle.
+        for (int row = 0; row < SudokuConstants.GRID_SIZE; ++row) {
+            for (int col = 0; col < SudokuConstants.GRID_SIZE; ++col) {
+                cells[row][col].newGame(puzzle.numbers[row][col], puzzle.isGiven[row][col]);
+            }
+        }
     }
+
 
     /**
      * Return true if the puzzle is solved
@@ -155,7 +181,7 @@ public class GameBoardPanel extends JPanel {
             if (isSolved()) {
                 JOptionPane.showMessageDialog(null, "Congratulation!");
 
-                Object[] opsi = {"Yes", "No"};
+                Object[] option = {"Yes", "No"};
                 // Menampilkan dialog dengan opsi dan mendapatkan nilai kembaliannya
                 int pilihan = JOptionPane.showOptionDialog(
                         null, // Komponen induk (null untuk dialog tengah layar)
@@ -164,15 +190,15 @@ public class GameBoardPanel extends JPanel {
                         JOptionPane.DEFAULT_OPTION, // Tipe ikon (DEFAULT_OPTION untuk ikon default)
                         JOptionPane.QUESTION_MESSAGE, // Tipe pesan (QUESTION_MESSAGE untuk pertanyaan)
                         null, // Icon kustom (null untuk ikon default)
-                        opsi, // Daftar opsi
-                        opsi[0]); // Opsi default yang terpilih 
+                        option, // Daftar opsi
+                        option[0]); // Opsi default yang terpilih 
         
                 // Menggunakan nilai kembaliannya untuk menentukan tindakan selanjutnya
                 if (pilihan == JOptionPane.CLOSED_OPTION) {
                     System.out.println("Dialog ditutup tanpa pemilihan.");
                     System.exit(0);
-                    }  else if (opsi[pilihan]==opsi[0]){
-                        newGame();
+                    }  else if (option[pilihan]==option[0]){
+                        newGames();
                     } else {
                    JOptionPane.showMessageDialog(null, "Thank you for playing");
                    System.exit(0);
@@ -180,5 +206,17 @@ public class GameBoardPanel extends JPanel {
             }
         }
     }
+
+    private String getSelectedDifficultyLevel() {
+        return (String) difficultyComboBox.getSelectedItem();
+    }
+
+    public void solve(){
+    for (int row = 0; row < SudokuConstants.GRID_SIZE; ++row) {
+        for (int col = 0; col < SudokuConstants.GRID_SIZE; ++col) {
+            cells[row][col].newGame(puzzle.numbers[row][col], true);
+        }
+    }
+}
 
 }
