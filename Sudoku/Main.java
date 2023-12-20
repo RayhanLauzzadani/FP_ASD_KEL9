@@ -88,7 +88,6 @@ public class Main extends JFrame {
     private void solvebtn() { // Call the newGame method on button click
         timer.stop();
         board.solve();
-        board.newGame(getSelectedDifficultyLevel());
     }
 
     // Method to start a new game

@@ -82,6 +82,8 @@ public class GameBoardPanel extends JPanel {
                 }
             }
         }
+        // Inisialisasi difficultyComboBox
+        difficultyComboBox = new JComboBox<>();
         JPanel southPanel = new JPanel(new FlowLayout());
         southPanel.add(scoreLabel);
 
@@ -98,23 +100,29 @@ public class GameBoardPanel extends JPanel {
         // Generate a new puzzle based on difficulty level
         int level;
         int toGivenCells;
-        switch (difficultyLevel.toLowerCase()) {
-            case "easy":
-                level = 1;
-                toGivenCells = 76;
-                break;
-            case "medium":
-                level = 2;
-                toGivenCells = 50;
-                break;
-            case "hard":
-                level = 3;
-                toGivenCells = 30;
-                break;
-            default:
-                level = 1; 
-                toGivenCells = 60;
-                // Default to medium if an invalid difficulty level is provided
+        if (difficultyLevel != null) {
+            switch (difficultyLevel.toLowerCase()) {
+                case "easy":
+                    level = 1;
+                    toGivenCells = 76;
+                    break;
+                case "medium":
+                    level = 2;
+                    toGivenCells = 50;
+                    break;
+                case "hard":
+                    level = 3;
+                    toGivenCells = 30;
+                    break;
+                default:
+                    level = 1; 
+                    toGivenCells = 60;
+                    // Default ke medium jika tingkat kesulitan yang tidak valid diberikan
+            }
+        } else {
+            // Jika difficultyLevel null, atur nilai default
+            level = 1;
+            toGivenCells = 60;
         }
         
         // Generate a new puzzle
