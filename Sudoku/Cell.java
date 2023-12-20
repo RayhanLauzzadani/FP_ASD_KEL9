@@ -41,6 +41,7 @@ public class Cell extends JTextField {
     /** The status of this cell defined in enum CellStatus */
     CellStatus status;
     boolean islocked;
+    int score;
 
     /** Constructor */
     public Cell(int row, int col) {
@@ -61,11 +62,13 @@ public class Cell extends JTextField {
         setDocument(new LimitInputCell(1));//Make cell has a limit length input
         super.setHorizontalAlignment(JTextField.CENTER);
         super.setFont(FONT_NUMBERS);
+        this.score = 0;
     }
 
     /** Reset this cell for a new game, given the puzzle number and isGiven */
     public void newGame(int number, boolean isGiven) {
         this.number = number;
+        this.score = 0;
         status = isGiven ? CellStatus.GIVEN : CellStatus.TO_GUESS;
         paint();    // paint itself
     }
@@ -86,12 +89,14 @@ public class Cell extends JTextField {
             super.setForeground(FG_NOT_GIVEN);
         } else if (status == CellStatus.CORRECT_GUESS) {  // from TO_GUESS
             super.setBackground(BG_CORRECT_GUESS);
+            updateScore(10);
         } else if (status == CellStatus.WRONG_GUESS) {    // from TO_GUESS
             super.setBackground(BG_WRONG_GUESS);
         }
-
-
     }
 
+    public void updateScore(int points) {
+        this.score += points;
+    }
 
 }

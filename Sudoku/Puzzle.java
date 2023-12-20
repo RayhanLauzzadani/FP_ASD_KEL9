@@ -63,7 +63,7 @@ public class Puzzle {
         int appearedNumber = toGivenCells;
         int limittedrowcol=9;
         if (levelGame==1){
-            appearedNumber = getRandomNumber(50,5);
+            appearedNumber = getRandomNumber(60,5);
             limittedrowcol = 8;
         }
         else if (levelGame==2){
@@ -137,6 +137,7 @@ public class Puzzle {
                 if (currentColumn>=9){
                     currentRow+=1;
                     currentColumn=0;
+                    currentValue=1;
                 }
                 continue;
             }

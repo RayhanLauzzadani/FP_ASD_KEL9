@@ -27,10 +27,12 @@ public class Main extends JFrame {
     JButton btnNewGame = new JButton("New Game");
     JButton btnSolve = new JButton("Solve");
     JLabel timerLabel = new JLabel("Timer: 0 seconds");
+    JLabel scoreLabel = new JLabel();
 
     // Timer variables
     private Timer timer;
     private int seconds;
+    private int totalScore;
 
     JComboBox<String> difficultyComboBox;
     JButton btnChangeDifficulty;
@@ -62,35 +64,31 @@ public class Main extends JFrame {
         buttonPanel.add(btnNewGame);
         buttonPanel.add(btnSolve);
         buttonPanel.add(timerLabel);
+        buttonPanel.add(scoreLabel);
         cp.add(buttonPanel, BorderLayout.SOUTH);
 
         changeDifficultyButton.addActionListener(e -> showDifficultyDialog());
-        btnSolve.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                board.solve();
-                if (board.isSolved()) {
-                    // Menggunakan Main.this untuk merujuk ke instance Main saat ini
-                    JOptionPane.showMessageDialog(Main.this, "Congratulations! Puzzle solved!", "Congratulations",
-                            JOptionPane.INFORMATION_MESSAGE);
-                } else {
-                    JOptionPane.showMessageDialog(Main.this, "Puzzle is not solved yet. Keep trying!", "Incomplete Puzzle",
-                            JOptionPane.WARNING_MESSAGE);
-                }
-            }
-        });
 
         // Add ActionListener for New Game button
         btnNewGame.addActionListener(e -> startNewGame());
+        btnSolve.addActionListener(e -> solvebtn());
 
         // Initialize the game board and timer
         initializeTimer();
         board.newGame(getSelectedDifficultyLevel());
+        totalScore = 0;
         startTimer();
 
         pack(); // Pack the UI components, instead of using setSize()
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // to handle window-closing
         setTitle("Sudoku");
         setVisible(true);
+    }
+    
+    private void solvebtn() { // Call the newGame method on button click
+        timer.stop();
+        board.solve();
+        board.newGame(getSelectedDifficultyLevel());
     }
 
     // Method to start a new game
@@ -101,6 +99,7 @@ public class Main extends JFrame {
         }
 
         restartTimer();
+        totalScore = 0;
         board.newGame(getSelectedDifficultyLevel());
     }
 
@@ -137,11 +136,12 @@ public class Main extends JFrame {
         updateTimerLabel();
         timer.start();
     }
+    
 
     // Method to update the timer label
     private void updateTimerLabel() {
         timerLabel.setText("Timer: " + seconds + " seconds");
-    }
+    }    
 
     /** The entry main() entry method */
     public static void main(String[] args) {

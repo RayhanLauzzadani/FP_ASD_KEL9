@@ -19,6 +19,7 @@ import javax.swing.border.LineBorder;
 public class GameBoardPanel extends JPanel {
     private static final long serialVersionUID = 1L;  // to prevent serial warning
     private String playerName;
+    private boolean gameFinished = false;
 
     static Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
     static int screenHeight = screenSize.height;
@@ -37,6 +38,9 @@ public class GameBoardPanel extends JPanel {
     private Puzzle puzzle = new Puzzle();
     JPanel gridsudoku = new JPanel();
     JComboBox<String> difficultyComboBox;
+    private int totalScore;
+
+    private JLabel scoreLabel = new JLabel("Total Score: 0");
     
     public void setPlayerName(String playerName) {
         this.playerName = playerName;
@@ -44,7 +48,7 @@ public class GameBoardPanel extends JPanel {
 
     /** Constructor */
     public GameBoardPanel() {
-        super.setLayout(new GridLayout());  // JPanel
+        super.setLayout(new BorderLayout());
         super.add(gridsudoku, BorderLayout.CENTER);
         gridsudoku.setPreferredSize(new Dimension(BOARD_WIDTH,BOARD_HEIGHT));
         gridsudoku.setBorder(new LineBorder(new Color(190, 208, 238),15));
@@ -78,7 +82,10 @@ public class GameBoardPanel extends JPanel {
                 }
             }
         }
+        JPanel southPanel = new JPanel(new FlowLayout());
+        southPanel.add(scoreLabel);
 
+        super.add(southPanel, BorderLayout.SOUTH);
         super.setPreferredSize(new Dimension(BOARD_WIDTH, BOARD_HEIGHT));
 
     }
@@ -87,17 +94,6 @@ public class GameBoardPanel extends JPanel {
      * Generate a new puzzle; and reset the gameboard of cells based on the puzzle.
      * You can call this method to start a new game.
      */
-    public void newGames() {
-        puzzle.newPuzzle(1, 60);
-
-        // Initialize all the 9x9 cells, based on the puzzle.
-        for (int row = 0; row < SudokuConstants.GRID_SIZE; ++row) {
-            for (int col = 0; col < SudokuConstants.GRID_SIZE; ++col) {
-                cells[row][col].newGame(puzzle.numbers[row][col], puzzle.isGiven[row][col]);
-            }
-        }
-    }
-
     public void newGame(String difficultyLevel) {
         // Generate a new puzzle based on difficulty level
         int level;
@@ -105,7 +101,7 @@ public class GameBoardPanel extends JPanel {
         switch (difficultyLevel.toLowerCase()) {
             case "easy":
                 level = 1;
-                toGivenCells = 60;
+                toGivenCells = 76;
                 break;
             case "medium":
                 level = 2;
@@ -116,8 +112,8 @@ public class GameBoardPanel extends JPanel {
                 toGivenCells = 30;
                 break;
             default:
-                level = 2; 
-                toGivenCells = 45;
+                level = 1; 
+                toGivenCells = 60;
                 // Default to medium if an invalid difficulty level is provided
         }
         
@@ -130,6 +126,12 @@ public class GameBoardPanel extends JPanel {
                 cells[row][col].newGame(puzzle.numbers[row][col], puzzle.isGiven[row][col]);
             }
         }
+        totalScore = 0;
+        updateScoreLabel();
+    }
+
+    public String getSelectedDifficultyLevel() {
+        return (String) difficultyComboBox.getSelectedItem();
     }
 
 
@@ -154,11 +156,17 @@ public class GameBoardPanel extends JPanel {
         public void actionPerformed(ActionEvent e) {
             // Get a reference of the JTextField that triggers this action event
             Cell sourceCell = (Cell)e.getSource();
-
-            // Retrieve the int entered
-            int numberIn = Integer.parseInt(sourceCell.getText());
-            // For debugging
-            System.out.println("You entered " + numberIn);
+            if (sourceCell.status == CellStatus.CORRECT_GUESS) {
+                return; // Jangan izinkan perubahan jika sudah benar
+            }
+            int numberIn;
+            try {
+                // Retrieve the int entered
+                numberIn = Integer.parseInt(sourceCell.getText());
+            } catch (NumberFormatException ex) {
+                // Handle non-integer input if needed
+                return;
+            }
 
             /*
              * [TODO 5] (later - after TODO 3 and 4)
@@ -168,6 +176,7 @@ public class GameBoardPanel extends JPanel {
              */
             if (numberIn == sourceCell.number) {
                 sourceCell.status = CellStatus.CORRECT_GUESS;
+                totalScore += 10;
             } else {
                 sourceCell.status = CellStatus.WRONG_GUESS;
             }
@@ -179,7 +188,8 @@ public class GameBoardPanel extends JPanel {
              *   by calling isSolved(). Put up a congratulation JOptionPane, if so.
              */
             if (isSolved()) {
-                JOptionPane.showMessageDialog(null, "Congratulation!");
+                JOptionPane.showMessageDialog(null, "Congratulation! Your Total Score: "+ totalScore);
+                
 
                 Object[] option = {"Yes", "No"};
                 // Menampilkan dialog dengan opsi dan mendapatkan nilai kembaliannya
@@ -198,17 +208,18 @@ public class GameBoardPanel extends JPanel {
                     System.out.println("Dialog ditutup tanpa pemilihan.");
                     System.exit(0);
                     }  else if (option[pilihan]==option[0]){
-                        newGames();
+                        newGame(getSelectedDifficultyLevel());
                     } else {
                    JOptionPane.showMessageDialog(null, "Thank you for playing");
                    System.exit(0);
                 }
             }
+            updateScoreLabel();
         }
     }
 
-    private String getSelectedDifficultyLevel() {
-        return (String) difficultyComboBox.getSelectedItem();
+    private void updateScoreLabel() {
+        scoreLabel.setText("Total Score: " + totalScore);
     }
 
     public void solve(){
@@ -217,6 +228,19 @@ public class GameBoardPanel extends JPanel {
             cells[row][col].newGame(puzzle.numbers[row][col], true);
         }
     }
-}
+    if (isSolved() && !gameFinished) {
+        gameFinished = true; // Set the game status to finished
+        JOptionPane.showMessageDialog(null, "Congratulations! Puzzle solved! Your Total Score: " + totalScore);
 
+        int choice = JOptionPane.showConfirmDialog(null, "Do you want to play again?", "Play Again",
+                JOptionPane.YES_NO_OPTION);
+        if (choice == JOptionPane.YES_OPTION) {
+            newGame(getSelectedDifficultyLevel()); // Start a new game if the player chooses to play again
+        } else {
+            JOptionPane.showMessageDialog(null, "Thank you for playing");
+            System.exit(0);
+        }
+    }
+    updateScoreLabel();
+    }
 }
